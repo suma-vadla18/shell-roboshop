@@ -10,11 +10,11 @@ do
     --instance-type "t3.micro" \
     --security-group-ids $SG_ID \
     --key-name <key-pair-name> \
-    --tag-specifications "esourceType=instance,Tags=[{Key=Name,Value=$instance}]" \
+    --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$instance}]" \
     --query 'Instances[0].InstanceId' \
     --output text )
     
-    if [ $instance == "frontend"]; then
+    if [ $instance == "frontend" ]; then
         IP=$( aws ec2 describe-instances \
         --instance-ids $INSTANCE_ID \
         --query 'Reservations[].Instances[].PublicIpAddress' \

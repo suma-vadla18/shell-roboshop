@@ -24,9 +24,8 @@ VALIDATE(){
     fi
 }
 
-echo "present working directory: $PWD"
 
-cp mongo.repo /etc/yum.repos.d/mongo.repo
+cp mongo.repo /etc/yum.repos.d/mongo.repo #$PWD is /home/ec2-user/shell-roboshop/
 VALIDATE $? "Copying Mongo Repo" 
 
 dnf install mongodb-org -y &>>$LOGS_FILE

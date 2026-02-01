@@ -1,6 +1,8 @@
 #!/bib/bash
 SG_ID="sg-084d04e99c224c7bc"
 AMI_ID="ami-0220d79f3f480ecf5"
+ZONE_ID="Z04464482SF21VOEQXSSU"
+DOMAIN_NAME="vadla.online"
 
 
 for instance in $@
@@ -18,13 +20,41 @@ do
         --instance-ids $INSTANCE_ID \
         --query 'Reservations[].Instances[].PublicIpAddress' \
         --output text )
+        RECORD_NAME="$DOMAIN_NAME"
+
     else
        IP=$( aws ec2 describe-instances \
             --instance-ids $INSTANCE_ID \
             --query 'Reservations[].Instances[].PrivateIpAddress' \
             --output text )
+    
+     RECORD_NAME="$instance.$DOMAIN_NAME"
      fi
-
      echo "IP Adress: $IP"
 
-done  
+    aws route53 change-resource-record-sets \
+    --hosted-zone-id $ZONE_ID \
+    --change-batch '
+    {
+        "Comment": "Updating record",
+        "Changes": [
+            {
+            "Action": "UPSERT",
+            "ResourceRecordSet": {
+                "Name": "'$RECORD_NAME'",
+                "Type": "A",
+                "TTL": 1,
+                "ResourceRecords": [
+                {
+                    "Value": "'$IP'"
+                }
+                ]
+            }
+            }
+        ]
+    }
+    '
+
+    echo "record updated for $instance"
+
+done
